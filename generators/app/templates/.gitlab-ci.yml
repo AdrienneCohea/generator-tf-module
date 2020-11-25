@@ -5,7 +5,7 @@
 # Entrypoint is also needed as image by default set `terraform` binary as an
 # entrypoint.
 image:
-  name: registry.gitlab.com/gitlab-org/gitlab-build-images:terraform
+  name: hashicorp/terraform:0.14.0-rc1
   entrypoint:
     - '/usr/bin/env'
     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
@@ -38,18 +38,19 @@ plan:
   stage: plan
   script:
     - terraform plan -out=$PLAN
-    - "terraform show --json $PLAN | convert_report > $JSON_PLAN_FILE"
+    # - "terraform show --json $PLAN | convert_report > $JSON_PLAN_FILE"
   artifacts:
     paths:
       - $PLAN
-    reports:
-      terraform: $JSON_PLAN_FILE
+    # reports:
+    #   terraform: $JSON_PLAN_FILE
 
 apply:
   stage: apply
-  only:
-    - default
   script:
     - terraform apply -input=false $PLAN
   dependencies:
     - plan
+  only:
+    - main
+  when: manual
